@@ -1,6 +1,9 @@
 # Latin2 typewriter: Aij (WIP)
 
+It uses a [Gap buffer](https://en.wikipedia.org/wiki/Gap_buffer). It can save latin2 text and it can wrap it when the screen becomes too small. Built using [Raylib](https://github.com/raysan5/raylib).
+
 ## Building
+Make file written for Windows (`rm` tool is from [CoreUtils for Windows](https://gnuwin32.sourceforge.net/packages/coreutils.htm)) but the code has to work on Linux.
 ```
 make build
 ```
