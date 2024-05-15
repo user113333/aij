@@ -4,7 +4,8 @@
 #include <ctype.h>
 #include <string.h>
 
-#include "latin2_unicode_table.h"
+#include "encoding_tables.h"
+static unsigned int *encoding_table = l2w1252mix_unicode_table;
 
 const int font_size_default = 40;
 
@@ -12,8 +13,8 @@ static int font_size = font_size_default;
 static int mode = 1; // 0: normal, 1: input, 2: visual
 static Font inter;
 static int lbuf_len = 0, rbuf_len = 0;
-static unsigned char lbuf[10000] = { 0 }; // latin2
-static unsigned char rbuf[10000] = { 0 }; // latin2
+static unsigned char lbuf[10000] = { 0 };
+static unsigned char rbuf[10000] = { 0 };
 
 #define APPEND_LBUF(X) lbuf[lbuf_len++] = (X);
 #define APPEND_RBUF(X) rbuf[rbuf_len++] = (X);
@@ -24,17 +25,18 @@ static unsigned char rbuf[10000] = { 0 }; // latin2
 #define IKPSR(X) ((IsKeyPressed(X) || IsKeyPressedRepeat(X)) && !IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_LEFT_SHIFT) && !IsKeyDown(KEY_LEFT_ALT)) // Is Key Pressed with left Shift and Repeated
 #define IKPCR(X) ((IsKeyPressed(X) || IsKeyPressedRepeat(X)) && IsKeyDown(KEY_LEFT_CONTROL) && !IsKeyDown(KEY_LEFT_SHIFT) && !IsKeyDown(KEY_LEFT_ALT)) // Is Key Pressed with left Control and Repeated
 #define IKPCS(X) (IsKeyPressed(X) && IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_LEFT_SHIFT) && !IsKeyDown(KEY_LEFT_ALT)) // Is Key Pressed with left Control and left Shift
+#define IKPM(X) (IsKeyPressed(X) && !IsKeyDown(KEY_LEFT_CONTROL) && !IsKeyDown(KEY_LEFT_SHIFT) && !IsKeyDown(KEY_RIGHT_ALT) && IsKeyDown(KEY_KB_MENU)) // Is Key Pressed Menu
 
-unsigned char unicode_to_latin2(unsigned int);
-unsigned int latin2_to_unicode(unsigned char);
+unsigned char unicode_to_uc(unsigned int);
+unsigned int uc_to_unicode(unsigned char);
 
-bool ispunc(char c) {
-    return (c == '.' || c == ',' || c == ';' || c == ' ' || c == ':');
+bool iswchar(unsigned char c) {
+    return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == 95;
 }
 
 void reload_font() {
     UnloadFont(inter);
-    inter = LoadFontEx("JetBrainsMono-Regular.ttf", font_size, latin2_unicode_table, 256);
+    inter = LoadFontEx("JetBrainsMono-Regular.ttf", font_size, encoding_table, 256);
 }
 
 void filesave() {
@@ -45,19 +47,16 @@ void filesave() {
     fclose(file);
 }
 
-void draw_cursor(float x, float y, unsigned char next_l2) {
-    if (!isgraph(next_l2)) {
-        next_l2 = 'a';
+void draw_cursor(float x, float y, unsigned char next_cp) {
+    if (!isgraph(next_cp)) {
+        next_cp = 'a';
     }
     if (mode == 1) {
         DrawRectangle(x, y, 2, inter.baseSize, WHITE);
     } else {
-        GlyphInfo gi = GetGlyphInfo(inter, next_l2);
+        GlyphInfo gi = GetGlyphInfo(inter, next_cp);
         DrawRectangle(x, y, gi.advanceX, inter.baseSize, WHITE);
     }
-}
-
-void draw_glyph(unsigned char l2) {
 }
 
 #define sum_y ((ccd_y * inter.baseSize) + (ccd_y * inter.glyphPadding))
@@ -68,37 +67,37 @@ void draw_buffer(void) {
     int i = 0; // iterator
     while (true) {
         cursor_drawn = false;
-        unsigned char l2, pl2, nl2;
+        unsigned char uc, puc, nuc;
         unsigned int cp, pcp, ncp;
         if (i < lbuf_len) {
-            l2 = lbuf[i];
+            uc = lbuf[i];
         } else {
-            l2 = rbuf[rbuf_len - (i - lbuf_len) - 1];
+            uc = rbuf[rbuf_len - (i - lbuf_len) - 1];
         }
-        cp = latin2_to_unicode(l2);
+        cp = uc_to_unicode(uc);
         if (i > 0) {
-            // calc previous cp and l2
+            // calc previous cp and uc
             int pi = i - 1;
             if (pi < lbuf_len) {
-                pl2 = lbuf[pi];
+                puc = lbuf[pi];
             } else {
-                pl2 = rbuf[rbuf_len - (pi - lbuf_len) - 1];
+                puc = rbuf[rbuf_len - (pi - lbuf_len) - 1];
             }
-            pcp = latin2_to_unicode(pl2);
+            pcp = uc_to_unicode(puc);
         }
         if (i+1 < lbuf_len + rbuf_len) {
-            // calc next cp and l2
+            // calc next cp and uc
             int ni = i - 1;
             if (ni < lbuf_len) {
-                nl2 = lbuf[ni];
+                nuc = lbuf[ni];
             } else {
-                nl2 = rbuf[rbuf_len - (ni - lbuf_len) - 1];
+                nuc = rbuf[rbuf_len - (ni - lbuf_len) - 1];
             }
-            ncp = latin2_to_unicode(nl2);
+            ncp = uc_to_unicode(nuc);
         }
 
         if (i == lbuf_len) {
-            draw_cursor(sum_x, (ccd_y * inter.baseSize) + (ccd_y * inter.glyphPadding), l2);
+            draw_cursor(sum_x, (ccd_y * inter.baseSize) + (ccd_y * inter.glyphPadding), uc);
             /* cursor_drawn = true; TODO */
         }
         if (i >= lbuf_len + rbuf_len) {
@@ -123,10 +122,10 @@ void draw_buffer(void) {
         if (sum_x + gi.advanceX * 2 > GetScreenWidth()) {
             cursor_drawn = true;
             newline_after = true;
-            if (!ispunc(pcp) && !ispunc(cp)) {
+            if (iswchar(pcp) && iswchar(cp)) {
                 cp = '-';
                 i--;
-            } else if (ispunc(pcp) && !ispunc(cp)) {
+            } else if (!iswchar(pcp) && iswchar(cp)) {
                 cp = '~';
                 i--;
             } else {
@@ -172,11 +171,12 @@ void normal(void) {
 
 void input(void) {
     int c;
+    int i = 0;
     while ((c = GetCharPressed())) {
-        if (c == ' ' && IsKeyDown(KEY_LEFT_SHIFT)) { continue; }
-        unsigned int l2 = unicode_to_latin2(c);
-        printf("c: %c, d: %d, l2: %d, 0xl2: %X\n", c, c, l2, l2);
-        APPEND_LBUF(l2);
+        if ((c == ' ' && IsKeyDown(KEY_LEFT_SHIFT)) || IsKeyDown(KEY_KB_MENU)) { continue; }
+        unsigned int uc = unicode_to_uc(c);
+        printf("c: %c, d: %d, uc: %d, 0xuc: %X\n", c, c, uc, uc);
+        APPEND_LBUF(uc);
     }
     if (IKPR(KEY_ENTER)) {
         APPEND_LBUF('\n');
@@ -219,6 +219,18 @@ void input(void) {
     if (IsKeyPressed(KEY_ESCAPE)) {
         /* mode = 0; */
     }
+    if (IKPM(KEY_K)) {
+        APPEND_LBUF(0x8B);
+    }
+    if (IKPM(KEY_L)) {
+        APPEND_LBUF(0x9B);
+    }
+    if (IKPM(KEY_COMMA)) {
+        APPEND_LBUF(0x8D);
+    }
+    if (IKPM(KEY_PERIOD)) {
+        APPEND_LBUF(0x9D);
+    }
 }
 
 void draw(void) {
@@ -235,7 +247,7 @@ int main(void) {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(1600, 900, "aij.exe");
     SetExitKey(0);
-    inter = LoadFontEx("JetBrainsMono-Regular.ttf", font_size, latin2_unicode_table, 256);
+    inter = LoadFontEx("JetBrainsMono-Regular.ttf", font_size, encoding_table, 256);
 
     while (!WindowShouldClose()) {
         BeginDrawing();
@@ -253,15 +265,15 @@ int main(void) {
     return 0;
 }
 
-unsigned int latin2_to_unicode(unsigned char l2) {
-    return latin2_unicode_table[l2];
+unsigned int uc_to_unicode(unsigned char uc) {
+    return encoding_table[uc];
 }
 
-unsigned char unicode_to_latin2(unsigned int unicode) {
+unsigned char unicode_to_uc(unsigned int unicode) {
     for (int i = 0; i < 256; i++) {
-        if (latin2_unicode_table[i] == unicode) {
+        if (encoding_table[i] == unicode) {
             return i;
         }
     }
-    return 0;
+    return '?';
 }
