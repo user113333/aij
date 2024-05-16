@@ -123,12 +123,6 @@ void input(void) {
     if (IKPR(KEY_BACKSPACE)) {
         cursor_backspace(curbuf);
     }
-    if (IKPCR(KEY_F)) {
-        rbuf_prelij_lbuf(curbuf);
-    }
-    if (IKPCR(KEY_B)) {
-        lbuf_prelij_rbuf(curbuf);
-    }
     if (IKPC(KEY_EQUAL)) {
         font_size += 5;
         reload_font();
@@ -159,19 +153,25 @@ void input(void) {
     if (IKPM(KEY_PERIOD)) {
         append_lbuf(curbuf, 0xBB);
     }
-    if (IKPAR(KEY_F)) {
+    if (IKPCR(KEY_L)) {
+        rbuf_prelij_lbuf(curbuf);
+    }
+    if (IKPCR(KEY_H)) {
+        lbuf_prelij_rbuf(curbuf);
+    }
+    if (IKPAR(KEY_L)) {
         cursor_to_start_of_word(curbuf);
     }
-    if (IKPCR(KEY_E)) {
-        cursor_to_end_of_word(curbuf);
-    }
-    if (IKPAR(KEY_B)) {
+    if (IKPAR(KEY_H)) {
         cursor_to_start_of_word_backwards(curbuf);
     }
-    if (IKPC(KEY_L)) {
+    if (IKPAR(KEY_E)) {
+        cursor_to_end_of_word(curbuf);
+    }
+    if (IKPC(KEY_E)) {
         cursor_to_end_of_line(curbuf);
     }
-    if (IKPC(KEY_H)) {
+    if (IKPC(KEY_A)) {
         cursor_to_start_of_line(curbuf);
     }
 }
