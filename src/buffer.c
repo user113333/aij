@@ -2,6 +2,10 @@
 
 #include <stdlib.h>
 
+bool istos(unsigned int c) {
+    return c == ' ' || c == '\t';
+}
+
 bool iskwc(unsigned int c) {
     return (((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= 192 && c <= 687)) && c != 247 && c != 215);
 }
@@ -86,16 +90,20 @@ void cursor_to_start_of_line(gap_t* gap) {
     while (gap->lbuf_len > 0 && gap->lbuf[gap->lbuf_len-1] != '\n') {
         lbuf_prelij_rbuf(gap);
     }
-    // almost cursor_to_start_of_word() except if already at start do nothing
-    while (gap->rbuf_len > 0 && !iskwc(gap->rbuf[gap->rbuf_len-1])) {
+    // next while is almost cursor_to_start_of_word() except if already at start do nothing
+    while (gap->rbuf_len > 0 && istos(gap->rbuf[gap->rbuf_len-1])) {
         rbuf_prelij_lbuf(gap);
     }
 }
 
-void cursor_to_previous_line(gap_t* gap) {
+void cursor_to_complete_start_of_line(gap_t* gap) {
     while (gap->lbuf_len > 0 && gap->lbuf[gap->lbuf_len-1] != '\n') {
         lbuf_prelij_rbuf(gap);
     }
+}
+
+void cursor_to_previous_line(gap_t* gap) {
+    cursor_to_complete_start_of_line(gap);
     lbuf_prelij_rbuf(gap);
     cursor_to_start_of_line(gap);
 }
