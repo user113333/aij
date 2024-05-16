@@ -174,6 +174,12 @@ void input(void) {
     if (IKPC(KEY_A)) {
         cursor_to_start_of_line(curbuf);
     }
+    if (IKPC(KEY_K)) {
+        cursor_to_previous_line(curbuf);
+    }
+    if (IKPC(KEY_J)) {
+        cursor_to_next_line(curbuf);
+    }
 }
 
 void draw(void) {

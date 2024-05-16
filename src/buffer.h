@@ -26,3 +26,5 @@ void cursor_to_start_of_word_backwards(gap_t* gap);
 void cursor_to_end_of_word(gap_t* gap);
 void cursor_to_end_of_line(gap_t* gap);
 void cursor_to_start_of_line(gap_t* gap);
+void cursor_to_previous_line(gap_t* gap);
+void cursor_to_next_line(gap_t* gap);

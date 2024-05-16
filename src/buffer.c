@@ -91,3 +91,17 @@ void cursor_to_start_of_line(gap_t* gap) {
         rbuf_prelij_lbuf(gap);
     }
 }
+
+void cursor_to_previous_line(gap_t* gap) {
+    while (gap->lbuf_len > 0 && gap->lbuf[gap->lbuf_len-1] != '\n') {
+        lbuf_prelij_rbuf(gap);
+    }
+    lbuf_prelij_rbuf(gap);
+    cursor_to_start_of_line(gap);
+}
+
+void cursor_to_next_line(gap_t* gap) {
+    cursor_to_end_of_line(gap);
+    rbuf_prelij_lbuf(gap);
+    cursor_to_start_of_line(gap);
+}
