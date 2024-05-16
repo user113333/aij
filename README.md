@@ -20,6 +20,7 @@ core:
 - <kbd>Control</kbd> + <kbd>-</kbd> to decrease font size
 - <kbd>Control</kbd> + <kbd>Shift</kbd> + <kbd>=</kbd> (<kbd>Control</kbd>+<kbd>+</kbd>) to reset font size to default value
 - <kbd>Control</kbd> + <kbd>s</kbd> to save into a file: "file.txt"
+
 secondary:
 - <kbd>Menu</kbd> + <kbd>k</kbd> to insert Left-Pointing Single Angle Quotation Mark
 - <kbd>Menu</kbd> + <kbd>l</kbd> to insert Right-Pointing Single Angle Quotation Mark
