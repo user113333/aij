@@ -11,8 +11,8 @@ static int font_size = font_size_default;
 static Font font;
 
 static int mode = 1; // 0: normal, 1: input, 2: visual
-static gap_t gap;
-static gap_t* curbuf = NULL;
+static buffer_t b;
+static buffer_t* curbuf = NULL;
 
 #define IKPR(X) ((IsKeyPressed(X) || IsKeyPressedRepeat(X)) && !IsKeyDown(KEY_LEFT_CONTROL) && !IsKeyDown(KEY_LEFT_SHIFT) && !IsKeyDown(KEY_LEFT_ALT)) // Is Key Pressed and Repeated
 #define IKPC(X) (IsKeyPressed(X) && IsKeyDown(KEY_LEFT_CONTROL) && !IsKeyDown(KEY_LEFT_SHIFT) && !IsKeyDown(KEY_LEFT_ALT)) // Is Key Pressed with left Control
@@ -29,7 +29,7 @@ void reload_font() {
     font = LoadFontEx("JetBrainsMono-Regular.ttf", font_size, latin2_mod, sizeof(latin2_mod) / sizeof(latin2_mod[0]));
 }
 
-void filesave(gap_t* b) {
+void filesave(buffer_t* b) {
     FILE* file = fopen("file.txt", "wb");
     for (int i = 0; i < b->lbuf_len + b->rbuf_len; i++) {
         uint32_t c = 0;
@@ -55,7 +55,7 @@ void draw_cursor(float x, float y) {
 }
 
 #define fontheight (font.baseSize + font.glyphPadding)
-void draw_buffer(gap_t* b) {
+void draw_buffer(buffer_t* b) {
     float x = 0;
     float y = 0;
     for (int i = 0; i < b->lbuf_len + b->rbuf_len + 1; i++) {
@@ -187,8 +187,8 @@ void draw(void) {
 }
 
 int main(void) {
-    gap = gap_create();
-    curbuf = &gap;
+    b = buffer_create();
+    curbuf = &b;
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(1600, 900, "aij.exe");
     SetExitKey(0);

@@ -1,9 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-// is tab or space
 bool istos(unsigned int c);
-// is keyword character
 bool iskwc(unsigned int c);
 
 typedef struct {
@@ -13,21 +11,21 @@ typedef struct {
     uint32_t rbuf_size;
     uint32_t* lbuf;
     uint32_t* rbuf;
-} gap_t;
+} buffer_t;
 
-gap_t gap_create(void);
-void append_lbuf(gap_t* gap, uint32_t el);
-void append_rbuf(gap_t* gap, uint32_t el);
-void lbuf_prelij_rbuf(gap_t* gap);
-void rbuf_prelij_lbuf(gap_t* gap);
+buffer_t buffer_create(void);
+void append_lbuf(buffer_t* b, uint32_t el);
+void append_rbuf(buffer_t* b, uint32_t el);
+void lbuf_prelij_rbuf(buffer_t* b);
+void rbuf_prelij_lbuf(buffer_t* b);
 
-//cursor is refering to the end of gap.lbuf
-void cursor_backspace(gap_t* gap);
-void cursor_to_start_of_word(gap_t* gap);
-void cursor_to_start_of_word_backwards(gap_t* gap);
-void cursor_to_end_of_word(gap_t* gap);
-void cursor_to_end_of_line(gap_t* gap);
-void cursor_to_start_of_line(gap_t* gap);
-void cursor_to_complete_start_of_line(gap_t* gap);
-void cursor_to_previous_line(gap_t* gap);
-void cursor_to_next_line(gap_t* gap);
+//cursor is refering to the end of b.lbuf
+void cursor_backspace(buffer_t* b);
+void cursor_to_start_of_word(buffer_t* b);
+void cursor_to_start_of_word_backwards(buffer_t* b);
+void cursor_to_end_of_word(buffer_t* b);
+void cursor_to_end_of_line(buffer_t* b);
+void cursor_to_start_of_line(buffer_t* b);
+void cursor_to_complete_start_of_line(buffer_t* b);
+void cursor_to_previous_line(buffer_t* b);
+void cursor_to_next_line(buffer_t* b);

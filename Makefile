@@ -1,13 +1,11 @@
 SRC:=src/main.c src/buffer.c
 
-.PHONY: build
+.PHONY: all build clean
 all:
 	echo nothing
 
-.PHONY: build
 build:
-	gcc $(SRC) raylib/lib/libraylib.a -Iraylib/include -lgdi32 -lwinmm -g -o aij.exe
+	gcc $(SRC) raylib/lib/libraylib.a -Iraylib/include -lgdi32 -lwinmm -W -g -o aij.exe
 
-.PHONY: build
 clean:
 	rm aij.exe
