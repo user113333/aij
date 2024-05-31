@@ -29,3 +29,5 @@ void cursor_to_start_of_line(buffer_t* b);
 void cursor_to_complete_start_of_line(buffer_t* b);
 void cursor_to_previous_line(buffer_t* b);
 void cursor_to_next_line(buffer_t* b);
+void curosr_to_previous_paragraph(buffer_t* b);
+void cursor_to_next_paragraph(buffer_t* b);

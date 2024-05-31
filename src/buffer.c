@@ -115,3 +115,15 @@ void cursor_to_next_line(buffer_t* b) {
     rbuf_prelij_lbuf(b);
     cursor_to_start_of_line(b);
 }
+
+void curosr_to_previous_paragraph(buffer_t* b) {
+    while (b->lbuf_len > 0 && b->lbuf[b->lbuf_len-1] != '\n' && b->lbuf[b->lbuf_len] != '\n') {
+        lbuf_prelij_rbuf(b);
+    }
+}
+
+void cursor_to_next_paragraph(buffer_t* b) {
+    while (b->rbuf_len > 0 && b->rbuf[b->rbuf_len-1] != '\n' && b->rbuf[b->rbuf_len] != '\n') {
+        rbuf_prelij_lbuf(b);
+    }
+}
