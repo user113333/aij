@@ -1,4 +1,4 @@
-SRC:=src/main.c src/buffer.c
+SRC:=src/main.c src/buffer.c src/utf8.c
 
 .PHONY: all build clean
 all:

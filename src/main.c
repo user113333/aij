@@ -4,7 +4,7 @@
 #include <ctype.h>
 #include <string.h>
 #include "buffer.h"
-#include "encodings.h"
+#include "utf8.h"
 
 const int font_size_default = 40;
 static int font_size = font_size_default;
@@ -25,8 +25,7 @@ static buffer_t* curbuf = NULL;
 
 void reload_font() {
     UnloadFont(font);
-    printf("%d\n", sizeof(latin2_mod));
-    font = LoadFontEx("JetBrainsMono-Regular.ttf", font_size, latin2_mod, sizeof(latin2_mod) / sizeof(latin2_mod[0]));
+    font = LoadFontEx("JetBrainsMono-Regular.ttf", font_size, NULL, 0);
 }
 
 void filesave(buffer_t* b) {
@@ -39,7 +38,7 @@ void filesave(buffer_t* b) {
             c = b->rbuf[b->rbuf_len - (i - b->lbuf_len) - 1];
         }
         char utf8[4];
-        int n = utf8_encode(utf8, c);
+        int n = unicode_to_utf8(utf8, c);
         fwrite(utf8, sizeof(char), n, file);
     }
     fclose(file);
