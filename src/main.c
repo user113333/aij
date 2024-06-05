@@ -3,195 +3,130 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
-#include "buffer.h"
-#include "utf8.h"
+#include "editor.h"
 
-const int font_size_default = 40;
-static int font_size = font_size_default;
+static int mode = 1;
+const int fontsize_default = 40;
 static Font font;
-
-static int mode = 1; // 0: normal, 1: input, 2: visual
-static buffer_t b;
-static buffer_t* curbuf = NULL;
-
-#define IKPR(X) ((IsKeyPressed(X) || IsKeyPressedRepeat(X)) && !IsKeyDown(KEY_LEFT_CONTROL) && !IsKeyDown(KEY_LEFT_SHIFT) && !IsKeyDown(KEY_LEFT_ALT)) // Is Key Pressed and Repeated
-#define IKPC(X) (IsKeyPressed(X) && IsKeyDown(KEY_LEFT_CONTROL) && !IsKeyDown(KEY_LEFT_SHIFT) && !IsKeyDown(KEY_LEFT_ALT)) // Is Key Pressed with left Control
-#define IKPSR(X) ((IsKeyPressed(X) || IsKeyPressedRepeat(X)) && !IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_LEFT_SHIFT) && !IsKeyDown(KEY_LEFT_ALT)) // Is Key Pressed with left Shift and Repeated
-#define IKPCR(X) ((IsKeyPressed(X) || IsKeyPressedRepeat(X)) && IsKeyDown(KEY_LEFT_CONTROL) && !IsKeyDown(KEY_LEFT_SHIFT) && !IsKeyDown(KEY_LEFT_ALT)) // Is Key Pressed with left Control and Repeated
-#define IKPCS(X) (IsKeyPressed(X) && IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_LEFT_SHIFT) && !IsKeyDown(KEY_LEFT_ALT)) // Is Key Pressed with left Control and left Shift
-#define IKPA(X) (IsKeyPressed(X) && !IsKeyDown(KEY_LEFT_CONTROL) && !IsKeyDown(KEY_LEFT_SHIFT) && IsKeyDown(KEY_LEFT_ALT)) // Is Key Pressed with left Alt
-#define IKPAR(X) ((IsKeyPressed(X) || IsKeyPressedRepeat(X)) && !IsKeyDown(KEY_LEFT_CONTROL) && !IsKeyDown(KEY_LEFT_SHIFT) && IsKeyDown(KEY_LEFT_ALT)) // Is Key Pressed with left Alt and Repeated
-#define IKPM(X) (IsKeyPressed(X) && !IsKeyDown(KEY_LEFT_CONTROL) && !IsKeyDown(KEY_LEFT_SHIFT) && !IsKeyDown(KEY_LEFT_ALT) && IsKeyDown(KEY_KB_MENU)) // Is Key Pressed with Menu
 
 void reload_font() {
     UnloadFont(font);
-    font = LoadFontEx("JetBrainsMono-Regular.ttf", font_size, NULL, 0);
+    font = LoadFontEx("JetBrainsMono-Regular.ttf", fontsize_default, NULL, 0);
 }
 
-void filesave(buffer_t* b) {
-    FILE* file = fopen("file.txt", "wb");
-    for (int i = 0; i < b->lbuf_len + b->rbuf_len; i++) {
-        uint32_t c = 0;
-        if (i < b->lbuf_len) {
-            c = b->lbuf[i];
-        } else {
-            c = b->rbuf[b->rbuf_len - (i - b->lbuf_len) - 1];
-        }
-        char utf8[4];
-        int n = unicode_to_utf8(utf8, c);
-        fwrite(utf8, sizeof(char), n, file);
-    }
-    fclose(file);
-}
+// TODO
+/* void filesave(buffer_t* b) { */
+/*     FILE* file = fopen("file.txt", "wb"); */
+/*     for (int i = 0; i < b->lbuf_len + b->rbuf_len; i++) { */
+/*         uint32_t c = 0; */
+/*         if (i < b->lbuf_len) { */
+/*             c = b->lbuf[i]; */
+/*         } else { */
+/*             c = b->rbuf[b->rbuf_len - (i - b->lbuf_len) - 1]; */
+/*         } */
+/*         char utf8[4]; */
+/*         int n = unicode_to_utf8(utf8, c); */
+/*         fwrite(utf8, sizeof(char), n, file); */
+/*     } */
+/*     fclose(file); */
+/* } */
 
-void draw_cursor(float x, float y) {
-    if (mode == 1) {
-        DrawRectangle(x, y, 2, font.baseSize, WHITE);
-    } else {
-        GlyphInfo gi = GetGlyphInfo(font, 'a');
-        DrawRectangle(x, y, gi.advanceX, font.baseSize, WHITE);
-    }
-}
+// TODO
+/* void draw_cursor(float x, float y) { */
+/*     if (mode == 1) { */
+/*         DrawRectangle(x, y, 2, font.baseSize, WHITE); */
+/*     } else { */
+/*         GlyphInfo gi = GetGlyphInfo(font, 'a'); */
+/*         DrawRectangle(x, y, gi.advanceX, font.baseSize, WHITE); */
+/*     } */
+/* } */
 
-#define fontheight (font.baseSize + font.glyphPadding)
-void draw_buffer(buffer_t* b) {
-    float x = 0;
-    float y = 0;
-    for (int i = 0; i < b->lbuf_len + b->rbuf_len + 1; i++) {
-        if (i == b->lbuf_len) {
-            draw_cursor(x, y);
-        }
-        if (i >= b->lbuf_len + b->rbuf_len) { break; }
-        uint32_t c;
-        if (i < b->lbuf_len) {
-            c = b->lbuf[i];
-        } else {
-            c = b->rbuf[b->rbuf_len - (i - b->lbuf_len) - 1];
-        }
-        if (c == '\n') {
-            y += fontheight;
-            x = 0;
-            continue;
-        }
-        if (c == '\t') {
-            GlyphInfo gi = GetGlyphInfo(font, ' ');
-            x += gi.advanceX * 4;
-            continue;
-        }
-        DrawTextCodepoint(font, c, (Vector2){x,y}, font_size, WHITE);
-        GlyphInfo gi = GetGlyphInfo(font, c);
-        x += gi.advanceX;
-    }
+// TODO
+/* #define fontheight (font.baseSize + font.glyphPadding) */
+/* void draw_buffer(buffer_t* b) { */
+/*     float x = 0; */
+/*     float y = 0; */
+/*     for (int i = 0; i < b->lbuf_len + b->rbuf_len + 1; i++) { */
+/*         if (i == b->lbuf_len) { */
+/*             draw_cursor(x, y); */
+/*         } */
+/*         if (i >= b->lbuf_len + b->rbuf_len) { break; } */
+/*         uint32_t c; */
+/*         if (i < b->lbuf_len) { */
+/*             c = b->lbuf[i]; */
+/*         } else { */
+/*             c = b->rbuf[b->rbuf_len - (i - b->lbuf_len) - 1]; */
+/*         } */
+/*         if (c == '\n') { */
+/*             y += fontheight; */
+/*             x = 0; */
+/*             continue; */
+/*         } */
+/*         if (c == '\t') { */
+/*             GlyphInfo gi = GetGlyphInfo(font, ' '); */
+/*             x += gi.advanceX * 4; */
+/*             continue; */
+/*         } */
+/*         DrawTextCodepoint(font, c, (Vector2){x,y}, font_size, WHITE); */
+/*         GlyphInfo gi = GetGlyphInfo(font, c); */
+/*         x += gi.advanceX; */
+/*     } */
+/*     while (y <= GetScreenHeight()) { */
+/*         y += fontheight; */
+/*         x = 0; */
+/*         DrawTextCodepoint(font, '~', (Vector2){x,y}, font_size, DARKGRAY); */
+/*     } */
+/* } */
 
-    while (y <= GetScreenHeight()) {
-        y += fontheight;
-        x = 0;
-        DrawTextCodepoint(font, '~', (Vector2){x,y}, font_size, DARKGRAY);
-    }
-}
-
-void normal(void) {
-    if (IKPR(KEY_L)) {
-        rbuf_prelij_lbuf(curbuf);
-    }
-    if (IKPR(KEY_H)) {
-        lbuf_prelij_rbuf(curbuf);
-    }
-    if (IsKeyPressed(KEY_I)) {
-        mode = 1;
-    }
+float draw_codepoint(uint32_t unicode, float x, int line_number) {
+    int font_height = font.baseSize;
+    GlyphInfo gi = GetGlyphInfo(font, unicode);
+    DrawTextCodepoint(
+        font,
+        unicode,
+        (Vector2){ x, line_number*font_height },
+        fontsize_default,
+        WHITE
+    );
+    return gi.advanceX;
 }
 
 void input(void) {
     int c;
     while ((c = GetCharPressed())) {
-        if ((c == ' ' && IsKeyDown(KEY_LEFT_SHIFT)) || IsKeyDown(KEY_KB_MENU)) { continue; }
-        printf("d: %d, c: %c, %d\n", c, c, iskwc(c));
-        append_lbuf(curbuf, c);
+        if (c == ' ' && IsKeyDown(KEY_LEFT_SHIFT)) { continue; }
+        printf("c: '%c', %d\n", c, c);
+        editor_handle_charinput(c);
     }
-    if (IKPR(KEY_ENTER)) {
-        append_lbuf(curbuf, '\n');
+    int k;
+    while ((k = GetKeyPressed())) {
+        if (k == KEY_LEFT_CONTROL) { continue; }
+        if (k == KEY_LEFT_SHIFT) { continue; }
+        if (k == KEY_LEFT_ALT) { continue; }
+        printf("k: %d\n", k);
+        editor_handle_keyinput(
+            k,
+            IsKeyDown(KEY_LEFT_CONTROL),
+            IsKeyDown(KEY_LEFT_SHIFT),
+            IsKeyDown(KEY_LEFT_ALT)
+        );
     }
-    if (IKPR(KEY_TAB)) {
-        append_lbuf(curbuf, '\t');
-    }
-    if (IKPSR(KEY_SPACE)) {
-        append_lbuf(curbuf, ' ');
-        append_lbuf(curbuf, ' ');
-    }
-    if (IKPR(KEY_BACKSPACE)) {
-        cursor_backspace(curbuf);
-    }
-    if (IKPC(KEY_EQUAL)) {
-        font_size += 5;
-        reload_font();
-    }
-    if (IKPC(KEY_MINUS)) {
-        font_size -= 5;
-        reload_font();
-    }
-    if (IKPCS(KEY_EQUAL)) {
-        font_size = font_size_default;
-        reload_font();
-    }
-    if (IKPC(KEY_S)) {
-        filesave(curbuf);
-    }
-    if (IsKeyPressed(KEY_ESCAPE)) {
-        /* mode = 0; */
-    }
-    if (IKPM(KEY_K)) {
-        append_lbuf(curbuf, 0x2039);
-    }
-    if (IKPM(KEY_L)) {
-        append_lbuf(curbuf, 0x203A);
-    }
-    if (IKPM(KEY_COMMA)) {
-        append_lbuf(curbuf, 0xAB);
-    }
-    if (IKPM(KEY_PERIOD)) {
-        append_lbuf(curbuf, 0xBB);
-    }
-    if (IKPCR(KEY_L)) {
-        rbuf_prelij_lbuf(curbuf);
-    }
-    if (IKPCR(KEY_H)) {
-        lbuf_prelij_rbuf(curbuf);
-    }
-    if (IKPAR(KEY_L)) {
-        cursor_to_start_of_word(curbuf);
-    }
-    if (IKPAR(KEY_H)) {
-        cursor_to_start_of_word_backwards(curbuf);
-    }
-    if (IKPAR(KEY_E)) {
-        cursor_to_end_of_word(curbuf);
-    }
-    if (IKPC(KEY_E)) {
-        cursor_to_end_of_line(curbuf);
-    }
-    if (IKPC(KEY_A)) {
-        cursor_to_start_of_line(curbuf);
-    }
-    if (IKPC(KEY_K)) {
-        cursor_to_previous_line(curbuf);
-    }
-    if (IKPC(KEY_J)) {
-        cursor_to_next_line(curbuf);
-    }
+}
+
+void normal(void) {
+    // vim normal mode
 }
 
 void draw(void) {
-    draw_buffer(curbuf);
+    editor_draw(0, 0, draw_codepoint);
 }
 
 int main(void) {
-    b = buffer_create();
-    curbuf = &b;
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(1600, 900, "aij.exe");
     SetExitKey(0);
     reload_font();
+    editor_init();
 
     while (!WindowShouldClose()) {
         BeginDrawing();

@@ -26,6 +26,11 @@ buffer_t buffer_create(void) {
     return b;
 }
 
+void buffer_destroy(buffer_t b) {
+    free(b.lbuf);
+    free(b.rbuf);
+}
+
 void append_lbuf(buffer_t* b, uint32_t el) {
     b->lbuf[b->lbuf_len++] = el;
 }
@@ -57,11 +62,18 @@ void cursor_to_start_of_word(buffer_t* b) {
     }
 }
 
-void cursor_backspace(buffer_t* b) {
+void cursor_delete_left(buffer_t* b) {
     if (b->lbuf_len == 0) {
         return;
     }
     b->lbuf_len--;
+}
+
+void cursor_delete_right(buffer_t* b) {
+    if (b->rbuf_len == 0) {
+        return;
+    }
+    b->rbuf_len--;
 }
 
 void cursor_to_start_of_word_backwards(buffer_t* b) {

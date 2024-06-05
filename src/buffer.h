@@ -14,13 +14,14 @@ typedef struct {
 } buffer_t;
 
 buffer_t buffer_create(void);
+void buffer_destroy(buffer_t b);
 void append_lbuf(buffer_t* b, uint32_t el);
 void append_rbuf(buffer_t* b, uint32_t el);
 void lbuf_prelij_rbuf(buffer_t* b);
 void rbuf_prelij_lbuf(buffer_t* b);
 
-//cursor is refering to the end of b.lbuf
-void cursor_backspace(buffer_t* b);
+void cursor_delete_left(buffer_t* b);
+void cursor_delete_rigth(buffer_t* b);
 void cursor_to_start_of_word(buffer_t* b);
 void cursor_to_start_of_word_backwards(buffer_t* b);
 void cursor_to_end_of_word(buffer_t* b);
