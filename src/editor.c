@@ -70,12 +70,12 @@ void editor_handle_keyinput(int key, bool ctrl_down, bool shift_down, bool alt_d
     }
 }
 
-void editor_draw(int xscroll, int yscroll, draw_char dcf) {
+void editor_draw(rendererinfo_t rend, fontinfo_t font, draw_char_function draw_char, draw_cursor_function draw_cursor) {
     float x = 0;
     float line_number = 0;
     for (int i = 0; i < curbuf->lbuf_len + curbuf->rbuf_len + 1; i++) {
         if (i == curbuf->lbuf_len) {
-            /* draw_cursor(x, line_number); */
+            draw_cursor(x, line_number * (font.height + font.padding_horizontal));
         }
         if (i >= curbuf->lbuf_len + curbuf->rbuf_len) { break; }
         uint32_t c;
@@ -91,11 +91,11 @@ void editor_draw(int xscroll, int yscroll, draw_char dcf) {
         }
         if (c == '\t') {
             for (int i = 0; i < tabstop; i++) {
-                x += dcf(' ', x, line_number);
+                x += draw_char(' ', x, line_number * (font.height + font.padding_horizontal));
             }
             continue;
         }
-        float advanceX = dcf(c, x, line_number);
+        float advanceX = draw_char(c, x, line_number * (font.height + font.padding_horizontal));
         x += advanceX;
     }
 }

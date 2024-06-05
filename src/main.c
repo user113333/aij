@@ -41,55 +41,23 @@ void reload_font() {
 /*     } */
 /* } */
 
-// TODO
-/* #define fontheight (font.baseSize + font.glyphPadding) */
-/* void draw_buffer(buffer_t* b) { */
-/*     float x = 0; */
-/*     float y = 0; */
-/*     for (int i = 0; i < b->lbuf_len + b->rbuf_len + 1; i++) { */
-/*         if (i == b->lbuf_len) { */
-/*             draw_cursor(x, y); */
-/*         } */
-/*         if (i >= b->lbuf_len + b->rbuf_len) { break; } */
-/*         uint32_t c; */
-/*         if (i < b->lbuf_len) { */
-/*             c = b->lbuf[i]; */
-/*         } else { */
-/*             c = b->rbuf[b->rbuf_len - (i - b->lbuf_len) - 1]; */
-/*         } */
-/*         if (c == '\n') { */
-/*             y += fontheight; */
-/*             x = 0; */
-/*             continue; */
-/*         } */
-/*         if (c == '\t') { */
-/*             GlyphInfo gi = GetGlyphInfo(font, ' '); */
-/*             x += gi.advanceX * 4; */
-/*             continue; */
-/*         } */
-/*         DrawTextCodepoint(font, c, (Vector2){x,y}, font_size, WHITE); */
-/*         GlyphInfo gi = GetGlyphInfo(font, c); */
-/*         x += gi.advanceX; */
-/*     } */
-/*     while (y <= GetScreenHeight()) { */
-/*         y += fontheight; */
-/*         x = 0; */
-/*         DrawTextCodepoint(font, '~', (Vector2){x,y}, font_size, DARKGRAY); */
-/*     } */
-/* } */
-
-float draw_codepoint(uint32_t unicode, float x, int line_number) {
-    int font_height = font.baseSize;
+float draw_char(uint32_t unicode, float x, float y) {
     GlyphInfo gi = GetGlyphInfo(font, unicode);
     DrawTextCodepoint(
         font,
         unicode,
-        (Vector2){ x, line_number*font_height },
+        (Vector2){ x, y },
         fontsize_default,
         WHITE
     );
     return gi.advanceX;
 }
+
+void draw_cursor(float x, float y) {
+    DrawRectangle(x, y, 3, font.baseSize, WHITE);
+}
+
+int normal(void) { }
 
 void input(void) {
     int c;
@@ -113,12 +81,10 @@ void input(void) {
     }
 }
 
-void normal(void) {
-    // vim normal mode
-}
-
 void draw(void) {
-    editor_draw(0, 0, draw_codepoint);
+    int rw = GetRenderWidth();
+    int rh = GetRenderWidth();
+    editor_draw((rendererinfo_t){rw, rh}, (fontinfo_t){0, font.baseSize, 0, 0},  draw_char, draw_cursor);
 }
 
 int main(void) {
