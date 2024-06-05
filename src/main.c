@@ -14,33 +14,6 @@ void reload_font() {
     font = LoadFontEx("JetBrainsMono-Regular.ttf", fontsize_default, NULL, 0);
 }
 
-// TODO
-/* void filesave(buffer_t* b) { */
-/*     FILE* file = fopen("file.txt", "wb"); */
-/*     for (int i = 0; i < b->lbuf_len + b->rbuf_len; i++) { */
-/*         uint32_t c = 0; */
-/*         if (i < b->lbuf_len) { */
-/*             c = b->lbuf[i]; */
-/*         } else { */
-/*             c = b->rbuf[b->rbuf_len - (i - b->lbuf_len) - 1]; */
-/*         } */
-/*         char utf8[4]; */
-/*         int n = unicode_to_utf8(utf8, c); */
-/*         fwrite(utf8, sizeof(char), n, file); */
-/*     } */
-/*     fclose(file); */
-/* } */
-
-// TODO
-/* void draw_cursor(float x, float y) { */
-/*     if (mode == 1) { */
-/*         DrawRectangle(x, y, 2, font.baseSize, WHITE); */
-/*     } else { */
-/*         GlyphInfo gi = GetGlyphInfo(font, 'a'); */
-/*         DrawRectangle(x, y, gi.advanceX, font.baseSize, WHITE); */
-/*     } */
-/* } */
-
 float draw_char(uint32_t unicode, float x, float y) {
     GlyphInfo gi = GetGlyphInfo(font, unicode);
     DrawTextCodepoint(

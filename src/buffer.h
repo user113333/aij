@@ -15,6 +15,7 @@ typedef struct {
 
 buffer_t buffer_create(void);
 void buffer_destroy(buffer_t b);
+void buffer_save(void);
 void append_lbuf(buffer_t* b, uint32_t el);
 void append_rbuf(buffer_t* b, uint32_t el);
 void lbuf_prelij_rbuf(buffer_t* b);
